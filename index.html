@@ -328,27 +328,29 @@ const MAX_RADIUS_M = 5000;
 
 const stands = [
   // Village départ (01–09)
-  { id: '01', nom: 'Parcours d\'obstacle', categorie: 'depart', description: 'Parcours avec franchissements, équilibre et coordination.', lat: 45.061722, lng: 6.030586 },
-  { id: '02', nom: 'Chamboule tout', categorie: 'depart', description: 'Jeux d\'adresse où tu dois renverser une pile de boîtes avec une balle.', lat: 45.061722, lng: 6.030586 },
-  { id: '03', nom: 'Jeux de bois', categorie: 'depart', description: 'Espace ludique proposant des jeux traditionnels d\'adresse et de précision en bois.', lat: 45.061722, lng: 6.030586 },
-  { id: '04', nom: 'Circuit en véhicule militaire', categorie: 'depart', description: 'Parcours à bord de véhicules militaires sur un circuit aménagé.', lat: 45.061722, lng: 6.030586 },
-  { id: '05', nom: 'Château gonflable', categorie: 'depart', description: 'Espace ludique réservé aux enfants, sous surveillance.', lat: 45.061722, lng: 6.030586 },
-  { id: '06', nom: 'Escalade', categorie: 'depart', description: 'Mur d\'escalade avec baudrier et accompagnement par moniteurs.', lat: 45.061722, lng: 6.030586 },
-  { id: '07', nom: 'Tir laser', categorie: 'depart', description: 'Découverte du tir laser encadrée, accessible aux enfants et aux adultes.', lat: 45.061722, lng: 6.030586 },
-  { id: '08', nom: 'Vision nocturne', categorie: 'depart', description: 'Découverte encadrée de jumelles et dispositifs de vision nocturne.', lat: 45.061722, lng: 6.030586 },
-  { id: '09', nom: 'Recherche DVA', categorie: 'depart', description: 'Démonstration de recherche de victimes d’avalanche à l’aide de détecteurs DVA.', lat: 45.061722, lng: 6.030586 },
-  // parcours (10–19)
+  { id: '01', nom: 'Zone de dépose des bus', categorie: 'depart', description: 'Parcours avec franchissements, équilibre et coordination.', lat: 45.063010, lng: 6.024303 },
+  { id: '02', nom: 'Accueil', categorie: 'depart', description: 'zone d\'Accueil.', lat: 45.061494, lng: 6.027115 },
+  { id: '03', nom: 'Parking N°1', categorie: 'depart', description: 'Parking N°1.', lat: 45.062890, lng: 6.026848 },
+  { id: '04', nom: 'Parking N°2', categorie: 'depart', description: 'Parking N°2.', lat: 45.063229, lng: 6.026282 },
+  { id: '05', nom: 'Parking N°3', categorie: 'depart', description: 'Parking N°3.', lat: 45.063105, lng: 6.024391 },
+  { id: '06', nom: 'Parking N°4', categorie: 'depart', description: 'Parking N°4.', lat: 45.063461, lng: 6.023008 },
+  { id: '07', nom: 'Parking N°5', categorie: 'depart', description: 'Parking N°5.', lat: 45.060681, lng: 6.024122 },
+  { id: '08', nom: 'Parking VIP', categorie: 'depart', description: 'Parking VIP.', lat: 45.061480, lng: 6.023229 },
+  { id: '09', nom: 'Parking organisation', categorie: 'depart', description: 'Parking pour l\'organisation.', lat: 45.061738, lng: 6.027050 },
+  // parcours (10–15)
   { id: '10', nom: 'Départ', categorie: 'parcours', description: 'Là où tout commence.', lat: 45.061722, lng: 6.030586 },
-  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
-  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
-  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
-  { id: '18', nom: 'Arrivée', categorie: 'parcours', description: 'La ligne d\'arrivée.', lat: 45.090377, lng: 6.071327 },
-  // Village d'arrivée (20–25)
-  { id: '20', nom: 'Navette Bus', categorie: 'arrivee', description: 'Navette gratuite vous ramenant au parking de Bourg d\'Oisans.', lat: 45.089349, lng: 6.071704 },
-  { id: '22', nom: 'Camion podium', categorie: 'arrivee', description: 'Restauration, boissons et places assises pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
-  { id: '23', nom: 'Restauration', categorie: 'arrivee', description: 'Restauration, boissons et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
-  { id: '24', nom: 'Buvette', categorie: 'arrivee', description: 'Boissons, glaces, crépes et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
-  { id: '25', nom: 'Équipe de secours', categorie: 'arrivee', description: 'Présence des secouristes assurant la sécurité et la prise en charge des urgences.', lat: 45.088617, lng: 6.072327 },
+  { id: '11', nom: 'Départ du chrono', categorie: 'parcours', description: 'On ne compte qu\'à partir d\'içi.', lat: 45.064277, lng: 6.039074 },
+  { id: '12', nom: 'Ravitaillement la Garde', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.067131, lng: 6.043949 },
+  { id: '13', nom: 'Ravitaillement du Virage 10', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.076442, lng: 6.048164 },
+  { id: '14', nom: 'Ravitaillement D\'Huez', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.080173, lng: 6.057293 },
+  { id: '15', nom: 'Équipe de secours', categorie: 'parcours', description: 'Présence des secouristes assurant la sécurité et la prise en charge des urgences.', lat: 45.080095, lng: 6.057143 },
+  { id: '16', nom: 'Arrivée', categorie: 'parcours', description: 'Arrêt Chrono.', lat: 45.090377, lng: 6.071327 },
+  // Village d'arrivée (16–20)
+  { id: '17', nom: 'Navette Bus', categorie: 'arrivee', description: 'Navette gratuite vous ramenant au parking de Bourg d\'Oisans.', lat: 45.089715, lng: 6.074902 },
+  { id: '18', nom: 'Camion podium', categorie: 'arrivee', description: 'Restauration, boissons et places assises pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '19', nom: 'Restauration', categorie: 'arrivee', description: 'Restauration, boissons et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '20', nom: 'Buvette', categorie: 'arrivee', description: 'Boissons, glaces, crépes et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '21', nom: 'Équipe de secours', categorie: 'arrivee', description: 'Présence des secouristes assurant la sécurité et la prise en charge des urgences.', lat: 45.088565, lng: 6.072774 },
 ];
 
 // ═══════════════════════════════════════
@@ -479,7 +481,7 @@ function openStandPopup(stand) {
     autoClose: false,
     closeOnClick: false,
     className: 'custom-popup',
-    offset: [0, 0],
+    offset: [0, -60],
     autoPan: true,
     autoPanPaddingTopLeft: [10, 60],
     autoPanPaddingBottomRight: [10, 280],
