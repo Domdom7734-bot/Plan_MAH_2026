@@ -1,39 +1,555 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plan MAH 2026</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        p {
-            color: #666;
-            line-height: 1.6;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MAH du 93e RAM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --text: #eef0f8;
+      --text-muted: #7c82a8;
+      --accent: #e8c547;
+
+      --cat-depart: #3ecf8e;
+      --cat-parcours: #4a9eff;
+      --cat-arrivee: #ef5b5b;
+
+      --menu-h: 52px;
+      --panel-h: 260px;
+      --header-h: 48px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'tahoma', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    header h1 {
+      font-family: 'tahoma', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .legend {
+      display: flex;
+      gap: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── MAP ── */
+    #map {
+      flex: 1;
+      width: 100%;
+      z-index: 1;
+    }
+
+    /* ── BOTTOM PANEL ── */
+    #panel {
+      height: var(--panel-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      height: var(--menu-h);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'tahoma', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20%; right: 20%;
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .tab-btn.active { color: var(--text); }
+    .tab-btn.active::after { background: var(--accent); }
+    .tab-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+
+    /* Stand list */
+    .tab-content {
+      display: none;
+      overflow-y: auto;
+      flex: 1;
+      padding: 6px 8px;
+      gap: 4px;
+      flex-direction: column;
+    }
+    .tab-content.active { display: flex; }
+
+    .stand-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--surface2);
+      border: 1px solid transparent;
+      transition: border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .stand-item:hover { border-color: var(--border); }
+    .stand-item.active { border-color: var(--accent); background: #22263a; }
+
+    .stand-badge {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'tahoma', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .stand-info { flex: 1; min-width: 0; }
+    .stand-name {
+      font-family: 'tahoma', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stand-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+    .stand-num {
+      font-family: 'tahoma', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* ── MAP POPUP / ENCART ── */
+    .stand-popup {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      min-width: 160px;
+      max-width: 200px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .stand-popup-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .stand-popup-badge {
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'tahoma', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .stand-popup-name {
+      font-family: 'tahoma', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .stand-popup-cat {
+      font-size: 9px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .stand-popup-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── LEAFLET OVERRIDES ── */
+    .leaflet-container { background: #1a1d27; }
+    .leaflet-control-zoom {
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+    }
+    .leaflet-control-zoom a {
+      background: var(--surface) !important;
+      color: var(--text) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .leaflet-control-zoom a:hover { background: var(--surface2) !important; }
+    .leaflet-control-attribution { display: none; }
+    .leaflet-popup-content-wrapper {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    .leaflet-popup-content { margin: 0 !important; }
+    .leaflet-popup-tip-container { display: none !important; }
+    .leaflet-popup { bottom: 14px !important; }
+
+    /* User location pulse */
+    .user-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 4px rgba(232,197,71,0.3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(232,197,71,0.3); }
+      50%       { box-shadow: 0 0 0 8px rgba(232,197,71,0.08); }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏔️ Plan MAH 2026</h1>
-        <p>Bienvenue sur le site du plan d'organisation de la 14e montée de l'Alpe d'Huez au profit des blessés de l'armée de Terre.</p>
-        <p>Ce projet est actuellement en développement.</p>
-    </div>
+
+<header>
+  <h1>14<sup style="font-size: 0.4em;">e</sup> montée de l'Alpe d'Huez<br><span style="font-size: 0.6em;">au profit des blessés de l'armée de Terre</span></h1>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cat-depart)"></div>Village départ</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cat-parcours)"></div>parcours</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cat-arrivee)"></div>Village arrivée</div>
+  </div>
+</header>
+
+<div id="map"></div>
+
+<div id="panel">
+  <div class="tabs">
+    <button class="tab-btn active" data-cat="depart" onclick="switchTab('depart')">
+      <span class="tab-dot" style="background:var(--cat-depart)"></span>Village départ
+    </button>
+    <button class="tab-btn" data-cat="parcours" onclick="switchTab('parcours')">
+      <span class="tab-dot" style="background:var(--cat-parcours)"></span>parcours
+    </button>
+    <button class="tab-btn" data-cat="arrivee" onclick="switchTab('arrivee')">
+      <span class="tab-dot" style="background:var(--cat-arrivee)"></span>Village arrivée
+    </button>
+  </div>
+  <div id="tab-depart"   class="tab-content active"></div>
+  <div id="tab-parcours" class="tab-content"></div>
+  <div id="tab-arrivee"    class="tab-content"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ═══════════════════════════════════════
+//  DONNÉES — modifiez ici vos stands
+// ═══════════════════════════════════════
+const CENTER = [45.076452, 6.051268];
+const MAX_RADIUS_M = 5000;
+
+const stands = [
+  // Village départ (01–09)
+  { id: '01', nom: 'Parcours d\'obstacle', categorie: 'depart', description: 'Parcours avec franchissements, équilibre et coordination.', lat: 45.061722, lng: 6.030586 },
+  { id: '02', nom: 'Chamboule tout', categorie: 'depart', description: 'Jeux d\'adresse où tu dois renverser une pile de boîtes avec une balle.', lat: 45.061722, lng: 6.030586 },
+  { id: '03', nom: 'Jeux de bois', categorie: 'depart', description: 'Espace ludique proposant des jeux traditionnels d\'adresse et de précision en bois.', lat: 45.061722, lng: 6.030586 },
+  { id: '04', nom: 'Circuit en véhicule militaire', categorie: 'depart', description: 'Parcours à bord de véhicules militaires sur un circuit aménagé.', lat: 45.061722, lng: 6.030586 },
+  { id: '05', nom: 'Château gonflable', categorie: 'depart', description: 'Espace ludique réservé aux enfants, sous surveillance.', lat: 45.061722, lng: 6.030586 },
+  { id: '06', nom: 'Escalade', categorie: 'depart', description: 'Mur d\'escalade avec baudrier et accompagnement par moniteurs.', lat: 45.061722, lng: 6.030586 },
+  { id: '07', nom: 'Tir laser', categorie: 'depart', description: 'Découverte du tir laser encadrée, accessible aux enfants et aux adultes.', lat: 45.061722, lng: 6.030586 },
+  { id: '08', nom: 'Vision nocturne', categorie: 'depart', description: 'Découverte encadrée de jumelles et dispositifs de vision nocturne.', lat: 45.061722, lng: 6.030586 },
+  { id: '09', nom: 'Recherche DVA', categorie: 'depart', description: 'Démonstration de recherche de victimes d’avalanche à l’aide de détecteurs DVA.', lat: 45.061722, lng: 6.030586 },
+  // parcours (10–19)
+  { id: '10', nom: 'Départ', categorie: 'parcours', description: 'Là où tout commence.', lat: 45.061722, lng: 6.030586 },
+  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
+  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
+  { id: '11', nom: 'Ravitaillement', categorie: 'parcours', description: 'reprise des forces et réhydratation.', lat: 45.101380, lng: 5.681463 },
+  { id: '18', nom: 'Arrivée', categorie: 'parcours', description: 'La ligne d\'arrivée.', lat: 45.090377, lng: 6.071327 },
+  // Village d'arrivée (20–25)
+  { id: '20', nom: 'Navette Bus', categorie: 'arrivee', description: 'Navette gratuite vous ramenant au parking de Bourg d\'Oisans.', lat: 45.089349, lng: 6.071704 },
+  { id: '22', nom: 'Camion podium', categorie: 'arrivee', description: 'Restauration, boissons et places assises pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '23', nom: 'Restauration', categorie: 'arrivee', description: 'Restauration, boissons et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '24', nom: 'Buvette', categorie: 'arrivee', description: 'Boissons, glaces, crépes et espace de pause pour les visiteurs.', lat: 45.088617, lng: 6.072327 },
+  { id: '25', nom: 'Équipe de secours', categorie: 'arrivee', description: 'Présence des secouristes assurant la sécurité et la prise en charge des urgences.', lat: 45.088617, lng: 6.072327 },
+];
+
+// ═══════════════════════════════════════
+//  COULEURS
+// ═══════════════════════════════════════
+const COLORS = {
+  depart:   '#3ecf8e',
+  parcours: '#4a9eff',
+  arrivee:    '#ef5b5b',
+};
+const CAT_LABELS = {
+  depart:   'Village départ',
+  parcours: 'parcours',
+  arrivee:    'Village d\'arrivée',
+};
+
+// ═══════════════════════════════════════
+//  CARTE
+// ═══════════════════════════════════════
+const map = L.map('map', {
+  center: CENTER,
+  zoom: 13,
+  zoomControl: true,
+  maxBounds: [
+    [CENTER[0] - 0.020, CENTER[1] - 0.030],
+    [CENTER[0] + 0.020, CENTER[1] + 0.030],
+  ],
+  maxBoundsViscosity: 0.9,
+  minZoom: 13,
+  maxZoom: 22,
+});
+
+L.tileLayer('https://server.arcgisonline.com/ArcGis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: '',
+  subdomains: 'abcd',
+  maxZoom: 22,
+}).addTo(map);
+
+// ── Marqueur position utilisateur ──
+const userIcon = L.divIcon({
+  className: '',
+  html: '<div class="user-dot"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(pos => {
+    const ll = [pos.coords.latitude, pos.coords.longitude];
+    if (!window._userMarker) {
+      window._userMarker = L.marker(ll, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+    } else {
+      window._userMarker.setLatLng(ll);
+    }
+  }, null, { enableHighAccuracy: true });
+}
+
+// ═══════════════════════════════════════
+//  MARQUEURS STANDS
+// ═══════════════════════════════════════
+const markers = {};
+let activePopup = null;
+let activeStandId = null;
+
+function makeStandIcon(stand, isActive) {
+  const color = COLORS[stand.categorie];
+  const border = isActive ? '#e8c547' : '#fff';
+  const size = isActive ? 34 : 28;
+  const fs = isActive ? 10 : 9;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${color};
+      border:2px solid ${border};
+      border-radius:${size/2}px ${size/2}px ${size/2}px 2px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'tahoma',sans-serif;font-size:${fs}px;font-weight:800;
+      color:#fff;
+      box-shadow:0 2px 8px rgba(0,0,0,0.5);
+      transform:rotate(0deg);
+      transition:all .2s;
+    ">${stand.id}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size],
+    popupAnchor: [0, -(size + 8)],
+  });
+}
+
+function openStandPopup(stand) {
+  const color = COLORS[stand.categorie];
+  if (activePopup) { map.closePopup(activePopup); }
+
+  // Highlight list item
+  document.querySelectorAll('.stand-item').forEach(el => el.classList.remove('active'));
+  const li = document.getElementById('li-' + stand.id);
+  if (li) li.classList.add('active');
+
+  // Switch tab if needed
+  if (li) {
+    const currentTab = document.querySelector('.tab-content.active');
+    if (!currentTab || currentTab.id !== 'tab-' + stand.categorie) {
+      switchTab(stand.categorie, false);
+      li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  // Refresh icon
+  if (activeStandId && markers[activeStandId]) {
+    const prev = stands.find(s => s.id === activeStandId);
+    if (prev) markers[prev.id].setIcon(makeStandIcon(prev, false));
+  }
+  activeStandId = stand.id;
+  markers[stand.id].setIcon(makeStandIcon(stand, true));
+
+  const popupContent = `
+    <div class="stand-popup">
+      <div class="stand-popup-header">
+        <div class="stand-popup-badge" style="background:${color}">${stand.id}</div>
+        <div class="stand-popup-name">${stand.nom}</div>
+      </div>
+      <div class="stand-popup-cat" style="color:${color}">${CAT_LABELS[stand.categorie]}</div>
+      <div class="stand-popup-desc">${stand.description}</div>
+    </div>`;
+
+  activePopup = L.popup({
+    closeButton: false,
+    autoClose: false,
+    closeOnClick: false,
+    className: 'custom-popup',
+    offset: [0, 0],
+    autoPan: true,
+    autoPanPaddingTopLeft: [10, 60],
+    autoPanPaddingBottomRight: [10, 280],
+  })
+    .setLatLng([stand.lat, stand.lng])
+    .setContent(popupContent)
+    .openOn(map);
+}
+
+stands.forEach(stand => {
+  const marker = L.marker([stand.lat, stand.lng], {
+    icon: makeStandIcon(stand, false),
+  }).addTo(map);
+
+  marker.on('click', () => {
+    map.setView([stand.lat, stand.lng], Math.max(map.getZoom(), 17), { animate: true });
+    setTimeout(() => openStandPopup(stand), 300);
+  });
+
+  markers[stand.id] = marker;
+});
+
+map.on('click', e => {
+  if (!e.originalEvent.target.closest?.('.leaflet-marker-icon')) {
+    if (activePopup) { map.closePopup(activePopup); activePopup = null; }
+    if (activeStandId) {
+      const prev = stands.find(s => s.id === activeStandId);
+      if (prev) markers[prev.id].setIcon(makeStandIcon(prev, false));
+      activeStandId = null;
+    }
+    document.querySelectorAll('.stand-item').forEach(el => el.classList.remove('active'));
+  }
+});
+
+// ═══════════════════════════════════════
+//  LISTE DES STANDS
+// ═══════════════════════════════════════
+['depart', 'parcours', 'arrivee'].forEach(cat => {
+  const container = document.getElementById('tab-' + cat);
+  stands.filter(s => s.categorie === cat).forEach(stand => {
+    const color = COLORS[stand.categorie];
+    const div = document.createElement('div');
+    div.className = 'stand-item';
+    div.id = 'li-' + stand.id;
+    div.innerHTML = `
+      <div class="stand-badge" style="background:${color}">${stand.id}</div>
+      <div class="stand-info">
+        <div class="stand-name">${stand.nom}</div>
+        <div class="stand-desc">${stand.description}</div>
+      </div>
+      <div class="stand-num">#${stand.id}</div>`;
+    div.addEventListener('click', () => {
+      // D'abord zoom out pour voir tout, puis zoom sur le stand
+      map.setView(CENTER, 15, { animate: true });
+      setTimeout(() => {
+        map.setView([stand.lat, stand.lng], 18, { animate: true });
+        setTimeout(() => openStandPopup(stand), 500);
+      }, 600);
+    });
+    container.appendChild(div);
+  });
+});
+
+// ═══════════════════════════════════════
+//  ONGLETS
+// ═══════════════════════════════════════
+function switchTab(cat, animate = true) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + cat));
+}
+</script>
 </body>
 </html>
